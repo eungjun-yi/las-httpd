@@ -70,8 +70,6 @@ class HttpdSuite extends FunSuite {
       override val docroot = tempFile.getParent
       val res = response(ByteString("GET /" + tempFile.getName() + " HTTP/1.1\r\n\r\n")) 
       val expected = ByteString("HTTP/1.1 200 OK\r\nContent-Length: 5\r\nContent-Type: text/plain\r\n\r\nhello")
-      println(res)
-      println(expected)
       assert(res == expected)
     }
   }

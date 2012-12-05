@@ -18,22 +18,27 @@ trait HTTP {
 
   def mimeType(file: File) = new Tika().detect(file)
 
-  def requestLine(bytes: ByteString) = ???
+  // Get request line from request
+  def requestLine(bytes: ByteString): String = ???
 
-  def notFound = ???
+  // Return "404 Not Found" response.
+  def notFound: ByteString = ???
 
-  def methodNotAllowed = ???
+  // Return "405 Method Not Allowed" response.
+  def methodNotAllowed: ByteString = ???
 
-  def badRequest = ???
+  // Return "400 Bad Request" response.
+  def badRequest: ByteString = ???
 
-  def ok(file: File) = ???
+  // Return 200 OK response with the given file.
+  def ok(file: File): ByteString = ???
 
   def serve(rHandle: ReadHandle, request: ByteString) = {
     rHandle.asSocket.write(response(request))
     rHandle.close()
   }
 
-  def readFile(file: File) = {
+  def readFile(file: File): ByteString = {
     val resource = new Array[Byte](file.length.toInt)
     val in = new FileInputStream(file)
     in.read(resource)
@@ -41,7 +46,8 @@ trait HTTP {
     ByteString(resource)
   }
 
-  def response(request: ByteString) = ???
+  // Read the given request and return appropriate response.
+  def response(request: ByteString): ByteString = ???
 
 }
 

@@ -10,35 +10,29 @@ import scala.util.matching.Regex
 import akka.actor.IO.ReadHandle
 
 trait HTTP {
-  def ??? : Nothing = throw new Error("an implementation is missing")
-
-  type ??? = Nothing
-
   val docroot = "."
 
   def mimeType(file: File) = new Tika().detect(file)
 
-  // Get request line from request
-  def requestLine(bytes: ByteString): String = ???
+  def requestLine(bytes: ByteString): String = bytes.takeWhile(_ != '\r').utf8String
 
-  // Return "404 Not Found" response.
-  def notFound: ByteString = ???
+  def notFound: ByteString = ByteString("HTTP/1.1 404 Not Found\r\n\r\n")
 
-  // Return "405 Method Not Allowed" response.
-  def methodNotAllowed: ByteString = ???
+  def methodNotAllowed: ByteString = ByteString("HTTP/1.1 405 Method Not Allowed\r\nAllow: GET\r\n\r\n")
 
-  // Return "400 Bad Request" response.
-  def badRequest: ByteString = ???
+  def badRequest: ByteString = ByteString("HTTP/1.1 400 Bad Request\r\n\r\n")
 
-  // Return 200 OK response with the given file.
-  def ok(file: File): ByteString = ???
+  def ok(file: File): ByteString = ByteString(
+    "HTTP/1.1 200 OK\r\n"
+    + "Content-Length: " + file.length() + "\r\n"
+    + "Content-Type: " + mimeType(file) + "\r\n\r\n") ++ readFile(file)
 
   def serve(rHandle: ReadHandle, request: ByteString) = {
     rHandle.asSocket.write(response(request))
     rHandle.close()
   }
 
-  def readFile(file: File): ByteString = {
+  def readFile(file: File) = {
     val resource = new Array[Byte](file.length.toInt)
     val in = new FileInputStream(file)
     in.read(resource)
@@ -46,9 +40,17 @@ trait HTTP {
     ByteString(resource)
   }
 
-  // Read the given request and return appropriate response.
-  def response(request: ByteString): ByteString = ???
-
+  def response(request: ByteString): ByteString = {
+    new Regex("\\s+").split(requestLine(request)) match {
+      case Array("GET", path, _) =>
+        new File(docroot, path) match {
+          case file if file.isFile() => ok(file)
+          case _ => notFound
+        }
+      case Array(_, _, _) => methodNotAllowed
+      case _ => badRequest
+    }
+  }
 }
 
 class TCPServer(port: Int) extends Actor with HTTP {

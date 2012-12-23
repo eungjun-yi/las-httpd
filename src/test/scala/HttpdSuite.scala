@@ -50,7 +50,7 @@ class HttpdSuite extends FunSuite {
 
   test("405 Method Not Allowed") {
     new Object with com.npcode.HTTP {
-      assert(methodNotAllowed == ByteString("HTTP/1.1 405 Method Not Allowed\r\n\r\n"))
+      assert(methodNotAllowed == ByteString("HTTP/1.1 405 Method Not Allowed\r\nAllow: GET\r\n\r\n"))
     }
   }
 
@@ -101,7 +101,7 @@ class HttpdSuite extends FunSuite {
     new Object with com.npcode.HTTP {
       override val docroot = tempFile.getParent
       val res = response(ByteString("FAKE /" + tempFile.getName() + " HTP/1.1\r\n\r\n"))
-      val expected = ByteString("HTTP/1.1 405 Method Not Allowed\r\n\r\n")
+      val expected = ByteString("HTTP/1.1 405 Method Not Allowed\r\nAllow: GET\r\n\r\n")
       assert(res == expected)
     }
   }

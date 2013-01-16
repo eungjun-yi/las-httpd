@@ -1,5 +1,1 @@
-A sample for the Typesafe Stack (http://typesafe.com/stack).
-
-Akka 2.0 sample project using Scala and SBT.
-
-To run and test it use SBT invoke: 'sbt run'
+This project has moved to [scala-http](https://github.com/codeport/scala-http)
